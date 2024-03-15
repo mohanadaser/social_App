@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:app_social/Shared/components.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 // ignore: must_be_immutable
 class LoginScreen extends StatefulWidget {
@@ -20,16 +19,17 @@ class _LoginScreenState extends State<LoginScreen> {
   var password = TextEditingController();
   final formKey = GlobalKey<FormState>();
   File? selectedimage;
-  void pickedImage() async {
-    var image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    var selected = File(image!.path);
-    // ignore: unnecessary_null_comparison
-    if (image != null) {
-      setState(() {
-        selectedimage = selected;
-      });
-    }
-  }
+
+  // void pickedImage() async {
+  //   var image = await ImagePicker().pickImage(source: ImageSource.gallery);
+  //   var selected = File(image!.path);
+  //   // ignore: unnecessary_null_comparison
+  //   if (image != null) {
+  //     setState(() {
+  //       selectedimage = selected;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -54,25 +54,21 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: h * 0.05),
               Stack(
                 children: [
-                  selectedimage != null
-                      ? SizedBox(
-                          height: 60,
-                          width: 60,
-                          child: CircleAvatar(
-                              radius: 25,
-                              backgroundImage: FileImage(selectedimage!)),
-                        )
-                      : const CircleAvatar(
-                          radius: 25,
-                          backgroundImage: NetworkImage(
-                              "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/1200px-Instagram_icon.png")),
+                  const SizedBox(
+                    height: 60,
+                    width: 60,
+
+                    child: CircleAvatar(
+                        radius: 25,
+                        backgroundImage: NetworkImage(
+                            "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/1200px-Instagram_icon.png")),
+                    // backgroundImage: FileImage(selectedimage!)),
+                  ),
                   Positioned(
                     top: 20,
                     left: 20,
                     child: IconButton(
-                      onPressed: () {
-                        pickedImage();
-                      },
+                      onPressed: () {},
                       icon: const Icon(Icons.add),
                       color: Colors.grey,
                     ),
