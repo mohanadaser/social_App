@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, unnecessary_null_comparison
 
 import 'dart:io';
 
@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   var emailaddress = TextEditingController();
   var password = TextEditingController();
   final formKey = GlobalKey<FormState>();
-  File imageSelected = File("");
+  File? imageSelected;
   void pickedImage() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom, allowedExtensions: ['jpg', 'pdf', 'doc']);
@@ -56,12 +56,19 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: h * 0.05),
               Stack(
                 children: [
-                   SizedBox(
-                      height: 60,
-                      width: 60,
-                      child: CircleAvatar(
-                          radius: 25,
-                          backgroundImage:FileImage(imageSelected))),
+                  SizedBox(
+                    height: 60,
+                    width: 60,
+                    child: imageSelected != null
+                        ? CircleAvatar(
+                            radius: 25,
+                            backgroundImage: FileImage(imageSelected!))
+                        : const CircleAvatar(
+                            radius: 25,
+                            backgroundImage: NetworkImage(
+                                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/1200px-Instagram_icon.png"),
+                          ),
+                  ),
                   Positioned(
                     top: 20,
                     left: 20,

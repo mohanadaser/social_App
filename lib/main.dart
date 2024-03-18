@@ -1,9 +1,14 @@
+import 'package:app_social/firebase_options.dart';
 import 'package:app_social/views/loginscreen.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-void main() {
+void main()async {
+  await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
   runApp(const MyApp());
 }
 
