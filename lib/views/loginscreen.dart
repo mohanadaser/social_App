@@ -4,11 +4,11 @@ import 'dart:io';
 
 import 'package:app_social/Shared/components.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 
 // ignore: must_be_immutable
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -19,15 +19,16 @@ class _LoginScreenState extends State<LoginScreen> {
   var emailaddress = TextEditingController();
   var password = TextEditingController();
   final formKey = GlobalKey<FormState>();
-  File? selectedimage;
-
+  File imageSelected = File("");
   void pickedImage() async {
-    var image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    var selected = File(image!.path);
-    // ignore: unnecessary_null_comparison
-    if (image != null) {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom, allowedExtensions: ['jpg', 'pdf', 'doc']);
+
+    if (result == null) {
+      print("No file selected");
+    } else {
       setState(() {
-        selectedimage = selected;
+        imageSelected = File(result.files.single.path ?? "");
       });
     }
   }
@@ -55,24 +56,17 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: h * 0.05),
               Stack(
                 children: [
-                  selectedimage != null
-                      ? SizedBox(
-                          height: 60,
-                          width: 60,
-                          child: CircleAvatar(
-                              radius: 25,
-                              backgroundImage: FileImage(selectedimage!))
-                          // backgroundImage: FileImage(selectedimage!)),
-                          )
-                      : const CircleAvatar(
+                   SizedBox(
+                      height: 60,
+                      width: 60,
+                      child: CircleAvatar(
                           radius: 25,
-                          backgroundImage: NetworkImage(
-                              "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/1200px-Instagram_icon.png")),
+                          backgroundImage:FileImage(imageSelected))),
                   Positioned(
                     top: 20,
                     left: 20,
                     child: IconButton(
-                      onPressed: () async{
+                      onPressed: () async {
                         pickedImage();
                       },
                       icon: const Icon(Icons.add),
