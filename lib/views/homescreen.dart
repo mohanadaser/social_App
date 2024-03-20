@@ -1,10 +1,12 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:app_social/views/loginscreen.dart';
 import 'package:app_social/widgets/posts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -31,7 +33,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                             fontSize: 25, fontWeight: FontWeight.bold)),
                     IconButton(
-                        onPressed: () {}, icon: const Icon(Icons.logout)),
+                        onPressed: () async {
+                          await FirebaseAuth.instance.signOut();
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) {
+                            return const LoginScreen();
+                          }));
+                        },
+                        icon: const Icon(Icons.logout)),
                   ],
                 ),
                 SizedBox(

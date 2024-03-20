@@ -3,6 +3,8 @@
 import 'dart:io';
 
 import 'package:app_social/Shared/components.dart';
+import 'package:app_social/views/bottomBar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -15,10 +17,19 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool isloading = false;
   var username = TextEditingController();
   var emailaddress = TextEditingController();
   var password = TextEditingController();
   final formKey = GlobalKey<FormState>();
+  @override
+  void dispose() {
+    username.dispose();
+    emailaddress.dispose();
+    password.dispose();
+    super.dispose();
+  }
+
   File? imageSelected;
   void pickedImage() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -29,6 +40,30 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       setState(() {
         imageSelected = File(result.files.single.path ?? "");
+      });
+    }
+  }
+
+  void login() async {
+    try {
+      setState(() {
+        isloading = true;
+      });
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailaddress.text, password: password.text);
+      Navigator.of(context)
+          .pushReplacement(MaterialPageRoute(builder: (context) {
+        return const BottomBarScreen();
+      }));
+      setState(() {
+        isloading = false;
+      });
+    } on FirebaseException catch (err) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(err.toString())));
+      setState(() {
+        isloading = false;
       });
     }
   }
@@ -129,13 +164,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                             onPressed: () {
-                              if (formKey.currentState!.validate()) {}
+                              if (formKey.currentState!.validate()) {
+                                login();
+                              }
                             },
-                            child: const Text(
-                              "Login",
-                              style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
-                            )))
+                            child: isloading == true
+                                ? const CircularProgressIndicator()
+                                : const Text(
+                                    "Login",
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold),
+                                  )))
                   ],
                 ),
               ),
