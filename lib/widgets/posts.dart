@@ -1,9 +1,14 @@
+// ignore_for_file: must_be_immutable
+
+import 'package:app_social/Models/firebase.dart';
 import 'package:app_social/views/addcomment.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class Posts extends StatelessWidget {
-  const Posts({super.key});
+  Map<String, dynamic> userpost;
+  Posts({super.key, required this.userpost});
 
   @override
   Widget build(BuildContext context) {
@@ -19,36 +24,53 @@ class Posts extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 30,
-                  backgroundImage: NetworkImage(
-                      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/1200px-Instagram_icon.png"),
+                  backgroundImage: NetworkImage(userpost["userimage"]),
                 ),
                 SizedBox(width: w * 0.05),
-                const Text(
-                  "name",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  userpost["username"],
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () {
+                    FirebaseMethod().deletePost(userdata: userpost);
+                  },
+                  icon: const Icon(Icons.delete_outline),
+                  color: Colors.red,
                 )
               ],
             ),
           ),
           Image(
             fit: BoxFit.cover,
-            image: const NetworkImage(
-                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/1200px-Instagram_icon.png"),
+            image: NetworkImage(userpost["imageposts"]),
             height: h * 0.5,
             width: double.infinity,
           ),
           Row(
             children: [
-              IconButton(onPressed: () {}, icon: const Icon(Icons.favorite)),
+              IconButton(
+                onPressed: () {
+                  FirebaseMethod().addLikes(postsmap: userpost);
+                },
+                icon: const Icon(Icons.favorite),
+                color: userpost["likes"]
+                        .contains(FirebaseAuth.instance.currentUser?.uid)
+                    ? Colors.red
+                    : Colors.white,
+              ),
+              Text("${userpost["likes"].length} likes"),
               IconButton(onPressed: () {}, icon: const Icon(Icons.comment)),
             ],
           ),
           const Text("nice photo"),
           TextButton(
               onPressed: () {
-                Get.to(() => const AddComment());
+                Get.to(() =>  AddComment(),arguments:userpost);
               },
               child: const Text("Add Comment")),
           const Text("1 Hour Ago")

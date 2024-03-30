@@ -6,6 +6,7 @@ Widget CustomForm(
         required TextInputType type,
         required bool issecure,
         final String? Function(String?)? validator,
+        final String?Function(String?)?onchange,
         Icon? prifixicon,
         Icon? sufixicon,
         required TextEditingController name}) =>
@@ -13,6 +14,7 @@ Widget CustomForm(
         padding: const EdgeInsets.all(10),
         child: TextFormField(
           autofocus: true,
+          onChanged: onchange,
           validator: validator,
           controller: name,
           obscureText: issecure,

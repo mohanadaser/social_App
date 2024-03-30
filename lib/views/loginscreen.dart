@@ -2,11 +2,16 @@
 
 import 'dart:io';
 
+import 'package:app_social/Models/usermodel.dart';
 import 'package:app_social/Shared/components.dart';
 import 'package:app_social/views/bottomBar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
 
 // ignore: must_be_immutable
 class LoginScreen extends StatefulWidget {
@@ -22,6 +27,14 @@ class _LoginScreenState extends State<LoginScreen> {
   var emailaddress = TextEditingController();
   var password = TextEditingController();
   final formKey = GlobalKey<FormState>();
+
+ @override
+  void setState(VoidCallback fn) {
+    if(mounted){
+      super.setState(fn);
+    }
+    
+  }
   @override
   void dispose() {
     username.dispose();
@@ -45,16 +58,30 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void login() async {
+    setState(() {
+      isloading = true;
+    });
     try {
-      setState(() {
-        isloading = true;
-      });
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: emailaddress.text, password: password.text);
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (context) {
-        return const BottomBarScreen();
-      }));
+      final uuid = const Uuid().v4();
+      final ref =
+          FirebaseStorage.instance.ref().child("userimage").child("${uuid}jpg");
+      await ref.putFile(imageSelected!);
+      final imageurl = await ref.getDownloadURL();
+      //========================================================لتخزين صوره مع id عشوائى
+      UserModel user = UserModel([], [], emailaddress.text, password.text,
+          username.text, imageurl, FirebaseAuth.instance.currentUser!.uid);
+      FirebaseFirestore.instance
+          .collection("users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .set(user.convrtToMap());
+      //===================================================save userdata in firebasestore
+      // Navigator.of(context)
+      //     .pushReplacement(MaterialPageRoute(builder: (context) {
+      //   return const BottomBarScreen();
+      // }));
+      Get.off(() => const BottomBarScreen());
       setState(() {
         isloading = false;
       });
@@ -62,9 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(err.toString())));
-      setState(() {
-        isloading = false;
-      });
+         isloading = false;
     }
   }
 

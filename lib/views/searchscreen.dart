@@ -1,8 +1,9 @@
 import 'package:app_social/Shared/components.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({Key? key}) : super(key: key);
+  const SearchScreen({super.key});
 
   @override
   _SearchScreenState createState() => _SearchScreenState();
@@ -21,6 +22,10 @@ class _SearchScreenState extends State<SearchScreen> {
             child: Column(
               children: [
                 CustomForm(
+                    onchange: (value) {
+                      setState(() {});
+                      return null;
+                    },
                     text: "Search...",
                     type: TextInputType.name,
                     issecure: false,
@@ -29,27 +34,39 @@ class _SearchScreenState extends State<SearchScreen> {
                 SizedBox(height: h * 0.05),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      separatorBuilder: (context, index) {
-                        return SizedBox(height: h * 0.02);
-                      },
-                      itemBuilder: (context, index) {
-                        return const ListTile(
-                          title: Text(
-                            "name",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          leading: CircleAvatar(
-                            radius: 30,
-                            backgroundImage: NetworkImage(
-                                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/1200px-Instagram_icon.png"),
-                          ),
-                        );
-                      },
-                      itemCount: 4),
+                  child: FutureBuilder(
+                      future: FirebaseFirestore.instance
+                          .collection('users')
+                          .where('username', isEqualTo: name.text)
+                          .get(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        }
+                        return ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            separatorBuilder: (context, index) {
+                              return SizedBox(height: h * 0.02);
+                            },
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(
+                                  snapshot.data?.docs[index]['username'],
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                leading: CircleAvatar(
+                                  radius: 30,
+                                  backgroundImage: NetworkImage(
+                                      snapshot.data?.docs[index]['userimage']),
+                                ),
+                              );
+                            },
+                            itemCount: snapshot.data!.docs.length);
+                      }),
                 )
               ],
             ),
